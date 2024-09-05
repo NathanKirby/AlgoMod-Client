@@ -67,6 +67,5 @@ namespace AlgoModSimpleWPF
 
             InfoData.ClearInfo();
         }
-
     }
 }
