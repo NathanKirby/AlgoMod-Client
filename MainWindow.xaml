@@ -1,0 +1,327 @@
+<Window x:Class="AlgoModSimpleWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AlgoModSimpleWPF"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        mc:Ignorable="d"
+        Background="#202020"
+        WindowStyle="None"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Title="AlgoMod v2.0" Height="150" Width="400">
+    <Window.Resources>
+
+        <Style x:Key="AlgoButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource OxygenFont}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="AlgoButtonBorder" CornerRadius="6" Background="#424242" BorderBrush="#666666" BorderThickness="2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="White"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="AlgoButtonBorder" Property="Background" Value="#404040"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="TextElement.Foreground" Value="White"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="BorderBrush" Value="#a8a8a8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="AlgoButtonBorder" Property="Background" Value="#141414"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="TextElement.Foreground" Value="#2e2e2e"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="BorderBrush" Value="#999999"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="AlgoButtonBorder" Property="Background" Value="#636363"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="TextElement.Foreground" Value="White"/>
+                                <Setter TargetName="AlgoButtonBorder" Property="BorderBrush" Value="#e3dd96"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AlgoComboBox" TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="{StaticResource OxygenFont}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <!-- dropdown -->
+                            <ToggleButton x:Name="ToggleButton" Grid.Column="2" ClickMode="Press" Focusable="False" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Border x:Name="Border" Background="#3b3b3b" BorderBrush="#4f4f4f" BorderThickness="2" CornerRadius="6">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="White"/>
+                                            </Border>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <!-- presenter -->
+                            <ContentPresenter x:Name="ContentSite"  VerticalAlignment="Center" HorizontalAlignment="Center" Content="{TemplateBinding SelectionBoxItem}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" IsHitTestVisible="False" TextElement.Foreground="White">
+                                <ContentPresenter.ContentTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
+                                    </DataTemplate>
+                                </ContentPresenter.ContentTemplate>
+                            </ContentPresenter>
+                            <!-- textbox -->
+                            <TextBox x:Name="PART_EditableTextBox" Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}" Background="Transparent" Foreground="White" HorizontalAlignment="Left" Margin="3,3,23,3" VerticalAlignment="Center" Focusable="True" />
+                            <!-- items -->
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid x:Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="#3b3b3b" BorderThickness="2" BorderBrush="#4f4f4f" CornerRadius="6"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True" Background="#292929" BorderBrush="#3d3d3d" Foreground="LightGray">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                            <!-- hover -->
+                            <Border x:Name="HoverBorder" Background="Transparent" BorderThickness="2" CornerRadius="6">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="#4f4f4f" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#404040"/>
+                                                <Setter Property="TextElement.Foreground" Value="White"/>
+                                                <Setter Property="BorderBrush" Value="#a8a8a8"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AlgoTextBox" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource OxygenFont}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="AlgoTextBoxBorder" CornerRadius="6" Background="#3b3b3b" BorderBrush="#4f4f4f" BorderThickness="2">
+                            <ScrollViewer x:Name="PART_ContentHost" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="AlgoTextBoxBorder" Property="Background" Value="#404040"/>
+                                <Setter TargetName="AlgoTextBoxBorder" Property="TextElement.Foreground" Value="White"/>
+                                <Setter TargetName="AlgoTextBoxBorder" Property="BorderBrush" Value="#a8a8a8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="AlgoTextBoxBorder" Property="Background" Value="#141414"/>
+                                <Setter TargetName="AlgoTextBoxBorder" Property="TextElement.Foreground" Value="#2e2e2e"/>
+                                <Setter TargetName="AlgoTextBoxBorder" Property="BorderBrush" Value="#999999"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="AlgoTextBoxBorder" Property="BorderBrush" Value="#007acc"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+    <Grid>
+        <Grid x:Name="SetupGrid" Visibility="Visible">
+            <Button x:Name="NextButton" Visibility="Hidden" Content="Continue" Style="{StaticResource AlgoButton}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="138" Margin="252,120,0,0" Click="Next" Cursor="Hand"/>
+            <TextBox x:Name="SetupTextBox" Style="{StaticResource AlgoTextBox}" Visibility="Hidden" TextWrapping="Wrap" Width="380" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,97,0,0" Foreground="White"/>
+
+            <!-- stage 0 (Patreon) -->
+            <TextBlock x:Name="PatreonLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Login with Patreon to continue" FontWeight="Bold" Foreground="White" Margin="57,82,57,49" TextAlignment="Center"/>
+            <Button x:Name="PatreonButton" Style="{StaticResource AlgoButton}" Visibility="Hidden" Click="PatreonClick1" Cursor="Hand" Content="Login With Patreon" Margin="113,112,113,19" Width="174"/>
+
+            <!-- stage 1 (rl path not found) -->
+            <TextBlock x:Name="RocketLeagueLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Enter /rocketleague folder here:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="243" FontWeight="Bold" Foreground="White" Margin="10,76,0,0"/>
+            <TextBlock x:Name="RocketLeagueWarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Sorry, we couldn't find your Rocket League folder." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,43,0,0"/>
+
+            <!-- stage 2 (2 rl installs) -->
+            <TextBlock x:Name="RLPathWarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="We found 2 Rocket League installs." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,71,0,0"/>
+            <TextBlock x:Name="RLPathLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="What version will you be using AlgoMod with? (can be changed later)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="White" Margin="10,93,0,0"/>
+            <Button x:Name="EpicButton" Style="{StaticResource AlgoButton}" Visibility="Hidden" Content="Epic Games" Click="EpicButtonClick" Cursor="Hand" HorizontalAlignment="Left" Margin="272,121,0,0" VerticalAlignment="Top" Width="118"/>
+            <Button x:Name="SteamButton" Style="{StaticResource AlgoButton}" Visibility="Hidden" Content="Steam" Click="SteamButtonClick" Cursor="Hand" HorizontalAlignment="Left" Margin="149,121,0,0" VerticalAlignment="Top" Width="118"/>
+
+            <!-- stage 4 (bakkes not found) -->
+            <TextBlock x:Name="BakkesLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="Enter BakkesMod folder here:" HorizontalAlignment="Left" VerticalAlignment="Top" Width="243" Foreground="White" Margin="10,76,0,0"/>
+            <TextBlock x:Name="BakkesWarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Sorry, we couldn't find your BakkesMod folder." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,43,0,0"/>
+
+            <!-- stage 5 (complete) -->
+            <TextBlock x:Name="SuccessLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="Successfully found all necessary files!" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="green" Margin="10,35,0,0"/>
+            <TextBlock x:Name="BakkesPathLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="?" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="gray" Margin="10,56,0,0" FontSize="8"/>
+            <TextBlock x:Name="FoundRLPathLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="?" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="gray" Margin="10,77,0,0" FontSize="8"/>
+            <TextBlock x:Name="InstallLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Click 'Download' to get AlgoMod's files." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="White" Margin="10,102,0,0" Grid.RowSpan="2"/>
+            <TextBlock x:Name="CloseRLLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="(will automatically close Rocket League if open)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="212" Foreground="gray" Margin="10,8,0,0" FontSize="9" Grid.Row="1"/>
+
+            <!-- stage 7 (ID not found)-->
+            <TextBlock x:Name="IDWarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Unable to find your Steam/Epic ID!" HorizontalAlignment="Left" VerticalAlignment="Center" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,0,0,0"/>
+            <TextBlock x:Name="IDLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="If you're on Epic, enter your Epic ID. For Steam, enter your Steam ID." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="Gray" Margin="10,71,0,0"/>
+
+            <!-- stage 8 (tier choose mod) -->
+            <Rectangle x:Name="ModButtonBackground" Visibility="Hidden" HorizontalAlignment="Left" Height="36" Stroke="#FF171717" VerticalAlignment="Top" Width="272" Fill="#FF171717" Margin="0,114,0,0"/>
+            <ComboBox x:Name="ModComboBox" Style="{StaticResource AlgoComboBox}" MouseLeftButtonUp="ModComboBox_MouseLeftButtonUp" Visibility="Hidden" SelectionChanged="ModComboBoxChanged" HorizontalAlignment="Left" Margin="5,121,0,0" VerticalAlignment="Top" Width="168"/>
+            <Image x:Name="ModImage" Visibility="Hidden" Source="Images/ChooseYourMods.png"  HorizontalAlignment="Left" Height="128" Margin="272,22,0,0" VerticalAlignment="Top" Width="128" Grid.RowSpan="2"/>
+            <Button x:Name="FinishButton" Style="{StaticResource AlgoButton}" Click="Finish" Cursor="Hand" Visibility="Hidden" Content="Finish" HorizontalAlignment="Left" Margin="178,121,0,0" VerticalAlignment="Top" Height="22" Width="90"/>
+            <Label x:Name="ModName" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" HorizontalAlignment="Left" Margin="0,22,0,0" VerticalAlignment="Top" Height="34" Width="267" Background="#00000000" Foreground="#FFC3C3C3" FontWeight="Bold" FontSize="16"/>
+            <TextBlock x:Name="ModDescription" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" VerticalAlignment="Top" Height="68" Width="262" Background="#00000000" Foreground="#FF8C8C8C" FontSize="11" Margin="5,46,0,0" TextWrapping="WrapWithOverflow"/>
+
+            <!-- stage 10 warn body -->
+            <Button x:Name="BackButton" Style="{StaticResource AlgoButton}" Visibility="Hidden" Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Width="62" Margin="10,120,0,0" Click="Back"/>
+            <TextBlock x:Name="BodyWarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="Attention!" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,43,0,0"/>
+            <TextBlock x:Name="BodyLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="Gray" Margin="10,64,0,0" FontSize="11"/>
+
+            <!-- stage 12 install -->
+            <TextBlock x:Name="InstallStatus" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" HorizontalAlignment="Center" Margin="0,69,0,0" VerticalAlignment="Top" Width="231" FontWeight="Bold" TextAlignment="Center" Foreground="#FFBBBBBB"/>
+
+            <!-- stage 13 choose epic id -->
+            <TextBlock x:Name="EpicID_WarnLabel" Visibility="Hidden" FontFamily="{StaticResource OxygenFontBold}" TextWrapping="Wrap" Text="We found multiple Epic accounts." HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" FontWeight="Bold" Foreground="Orange" Margin="10,71,0,0"/>
+            <TextBlock x:Name="EpicID_Text" Visibility="Hidden" FontFamily="{StaticResource OxygenFont}" TextWrapping="Wrap" Text="Which account are you going to use AlgoMod with?" HorizontalAlignment="Left" VerticalAlignment="Top" Width="374" Foreground="White" Margin="10,93,0,0"/>
+            <ComboBox x:Name="EpicID_ComboBox" Style="{StaticResource AlgoComboBox}" MouseLeftButtonUp="EpicID_ComboBox_MouseLeftButtonUp" SelectionChanged="EpicID_ComboBox_SelectionChanged" Cursor="Hand" Visibility="Hidden" HorizontalAlignment="Left" Margin="10,120,0,0" VerticalAlignment="Top" Width="262" Height="20"/>
+            <Button x:Name="EpicID_Button" IsEnabled="False" Style="{StaticResource AlgoButton}" Visibility="Hidden" Click="EpicID_Click" Cursor="Hand" Content="Continue" HorizontalAlignment="Left" Margin="278,120,0,0" VerticalAlignment="Top" Width="112"/>
+
+            <Image x:Name="SetupQuestionDot" Visibility="Visible" Opacity="0.50" Source="Images/QuestionDot.png" MouseEnter="SetupQuestionDot_MouseEnter" MouseLeave="SetupQuestionDot_MouseLeave" MouseLeftButtonUp="SetupQuestionClick" HorizontalAlignment="Left" Height="30" Margin="360,31,0,0" VerticalAlignment="Top" Width="30" Cursor="Hand"/>
+        </Grid>
+
+        <Grid x:Name="AllTabsGrid" Visibility="Visible">
+            <!-- tab controls -->
+            <Grid x:Name="TabsGrid" Visibility="Collapsed">
+                <Rectangle x:Name="Tab1_Rectangle" MouseUp="Tab1_Rectangle_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="0,22,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="75"/>
+                <TextBlock FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="0,25,0,0" TextWrapping="Wrap" Text="Injector" VerticalAlignment="Top" Height="19" Width="75" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="Tab2_Rectangle" MouseUp="Tab2_Rectangle_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="80,22,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="75"/>
+                <TextBlock FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="80,25,0,0" TextWrapping="Wrap" Text="File" VerticalAlignment="Top" Height="19" Width="75" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="Tab3_Rectangle" MouseUp="Tab3_Rectangle_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="160,22,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="75"/>
+                <TextBlock FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="160,25,0,0" TextWrapping="Wrap" Text="More" VerticalAlignment="Top" Height="19" Width="75" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="Tab4_Rectangle" MouseUp="Tab4_Rectangle_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="240,22,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="75"/>
+                <TextBlock FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="240,25,0,0" TextWrapping="Wrap" Text="Links" VerticalAlignment="Top" Height="19" Width="75" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="Tab5_Rectangle" MouseUp="Tab5_Rectangle_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="320,22,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="80"/>
+                <TextBlock FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="320,25,0,0" TextWrapping="Wrap" Text="Help" VerticalAlignment="Top" Height="19" Width="80" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+            </Grid>
+
+            <!-- tab injector -->
+            <Grid x:Name="InjectorGrid" Visibility="Collapsed">
+                <Image HorizontalAlignment="Left" Source="Images/InjectorShadow1.png" Height="104" Margin="0,45,0,0" Stretch="Fill" VerticalAlignment="Top" Width="136" Grid.RowSpan="2" Opacity="0.5" />
+                <Image HorizontalAlignment="Left" Source="Images/InjectorShadow2.png" Height="104" Margin="141,45,0,0" Stretch="Fill" VerticalAlignment="Top" Width="161" Grid.RowSpan="2" Opacity="0.5" />
+                <Image HorizontalAlignment="Left" Source="Images/InjectorShadow3.png" Height="104" Margin="307,46,0,0" Stretch="Fill" VerticalAlignment="Top" Width="93" Grid.RowSpan="2" Opacity="0.4" />
+                <Rectangle HorizontalAlignment="Left" Height="34" Stroke="#303030" VerticalAlignment="Top" Width="136" Fill="#303030" Margin="0,116,0,0"/>
+                <Rectangle HorizontalAlignment="Left" Height="34" Stroke="#303030" VerticalAlignment="Top" Width="161" Margin="141,116,0,0" Fill="#303030"/>
+                <Rectangle HorizontalAlignment="Left" Height="34" Stroke="#303030" VerticalAlignment="Top" Width="93" Margin="307,116,0,0" Fill="#303030"/>
+
+                <!-- map -->
+                <Image x:Name="MapImageLoading" gif:ImageBehavior.AnimatedSource="Images/AlgoLoadCircle.gif" HorizontalAlignment="Left" Height="46" Margin="201,61,0,0" VerticalAlignment="Top" Width="42"/>
+                <Image x:Name="MapImage" Height="66" HorizontalAlignment="Left" Margin="158,48,0,0" VerticalAlignment="Top" Width="128"/>
+                <ComboBox x:Name="Map_ComboBox" MouseLeftButtonUp="Map_ComboBox_MouseLeftButtonUp" Cursor="Hand" DropDownClosed="Map_ComboBox_DropDownClosed" Style="{StaticResource AlgoComboBox}" SelectionChanged="Map_ComboBox_SelectionChanged" HorizontalAlignment="Left" Margin="146,122,0,0" VerticalAlignment="Top" Width="151"/>
+                <Image x:Name="MapBorder" Source="Images/MapBoarder.png" MouseEnter="MapBorderMouseEnter" MouseLeave="MapBorderMouseLeave" MouseLeftButtonDown="MapBorderMouseLeftButtonDown" MouseLeftButtonUp="MapBorderMouseLeftButtonUp" Cursor="Hand" Height="66" HorizontalAlignment="Left" Margin="156,48,0,0" VerticalAlignment="Top" Width="132"/>
+
+                <!-- mod -->
+                <ComboBox x:Name="Mod_ComboBox" Style="{StaticResource AlgoComboBox}" Cursor="Hand" MouseLeftButtonUp="Mod_ComboBox_MouseLeftButtonUp" SelectionChanged="Mod_ComboBox_SelectionChanged" DropDownClosed="Mod_ComboBox_DropDownClosed" HorizontalAlignment="Left" Margin="6,122,0,0" VerticalAlignment="Top" Width="124"/>
+                <Image x:Name="ModImageLoading" gif:ImageBehavior.AnimatedSource="Images/AlgoLoadCircle.gif" HorizontalAlignment="Left" Height="46" Margin="46,60,0,0" VerticalAlignment="Top" Width="42"/>
+                <Image x:Name="ModInjectorImage" HorizontalAlignment="Left" Height="62" Margin="36,50,0,0" VerticalAlignment="Top" Width="63"/>
+                <Image x:Name="ModBoarder" Cursor="Hand" MouseEnter="ModBorderMouseEnter" MouseLeave="ModBorderMouseLeave" MouseLeftButtonDown="ModBorderMouseLeftButtonDown" MouseLeftButtonUp="ModBorderMouseLeftButtonUp" HorizontalAlignment="Left" Source="Images/ModBorder.png" Height="66" Margin="34,48,0,0" VerticalAlignment="Top" Width="66"/>
+
+                <!-- version -->
+                <Image HorizontalAlignment="Left" Source="Images/SteamEpic_Shadow.png" Height="56" Margin="305,56,0,0" VerticalAlignment="Top" Width="95" Opacity="0.5"/>
+                <Image x:Name="VersionSteam" Cursor="Hand" MouseLeftButtonUp="Steam_Clicked" MouseEnter="VersionSteam_MouseEnter" MouseLeave="VersionSteam_MouseLeave" Source="Images/SteamLogoAlgo.png" HorizontalAlignment="Left" Height="43" Margin="311,59,0,0" VerticalAlignment="Top" Width="44"/>
+                <Image x:Name="VersionEpic" Cursor="Hand" MouseLeftButtonUp="Epic_Clicked" MouseEnter="VersionEpic_MouseEnter" MouseLeave="VersionEpic_MouseLeave" Source="Images/EpicLogoAlgo.png" HorizontalAlignment="Left" Height="43" Margin="350,59,0,0" VerticalAlignment="Top" Width="44"/>
+
+                <Image x:Name="ModQuestionDot" Opacity="0.50" Source="Images/QuestionDot.png" MouseEnter="ModQuestionDot_MouseEnter" MouseLeave="ModQuestionDot_MouseLeave" MouseLeftButtonUp="ModQuestionClick" HorizontalAlignment="Left" Height="20" Margin="100,48,0,0" VerticalAlignment="Top" Width="20" Cursor="Hand"/>
+                <Button x:Name="InjectButton" Content="Inject" Style="{StaticResource AlgoButton}" Click="Inject_Click" Cursor="Hand" HorizontalAlignment="Left" Margin="311,122,0,0" VerticalAlignment="Top" Width="85" Height="24"/>
+            </Grid>
+
+            <!-- tab file -->
+            <Grid x:Name="FileGrid" Visibility="Collapsed">
+                <TextBox x:Name="Path_TextBox" Style="{StaticResource AlgoTextBox}" HorizontalAlignment="Center" Margin="0,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380" Height="20" Foreground="White"/>
+                <Button x:Name="OpenFolder_Button" Style="{StaticResource AlgoButton}" Click="OpenFolder_Click" Cursor="Hand" Content="Open Folder" HorizontalAlignment="Left" Margin="10,120,0,0" VerticalAlignment="Top" Width="124"/>
+                <Button x:Name="AutoFind_Button" Style="{StaticResource AlgoButton}" Click="AutoFind_Click" Cursor="Hand" Content="Auto-Find Path" HorizontalAlignment="Center" VerticalAlignment="Top" Width="124" Margin="0,120,0,0"/>
+                <Button x:Name="SetPath_Button" Style="{StaticResource AlgoButton}" Click="SetPath_Click" Cursor="Hand" Content="Set Path" HorizontalAlignment="Left" Margin="266,120,0,0" VerticalAlignment="Top" Width="124"/>
+                <Rectangle x:Name="SteamPath_Rectangle" Cursor="Hand" MouseUp="Tab2_SteamPath_MouseUp" HorizontalAlignment="Left" Height="23" Margin="0,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="130"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="0,53,0,0" TextWrapping="Wrap" Text="Steam RL Path" VerticalAlignment="Top" Height="19" Width="130" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+                <Rectangle x:Name="EpicPath_Rectangle" Cursor="Hand" MouseUp="Tab2_EpicPath_MouseUp" HorizontalAlignment="Center" Height="23" Margin="0,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="130"/>
+                <TextBlock HorizontalAlignment="Center" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="0,53,0,0" TextWrapping="Wrap" Text="Epic RL Path" VerticalAlignment="Top" Height="19" Width="128" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+                <Rectangle x:Name="BakkesPath_Rectangle" Cursor="Hand" MouseUp="Tab2_BakkesPath_MouseUp" HorizontalAlignment="Left" Height="23" Margin="270,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="130"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="270,53,0,0" TextWrapping="Wrap" Text="BakkesMod Path" VerticalAlignment="Top" Height="19" Width="130" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+                <TextBlock x:Name="PathLabel_TextBlock" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" Margin="10,76,0,0" TextWrapping="Wrap" Text="What would you like to do with this path?" VerticalAlignment="Top" Width="384" Foreground="#FFC3C3C3"/>
+            </Grid>
+
+            <!-- tab more -->
+            <Grid x:Name="MoreGrid" Visibility="Collapsed">
+                <Rectangle x:Name="General_Rectangle" MouseUp="More_General_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="0,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="97"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="1,53,0,0" TextWrapping="Wrap" Text="General" VerticalAlignment="Top" Height="19" Width="96" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="AddMod_Rectangle" MouseUp="More_AddMod_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="102,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="96"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="102,53,0,0" TextWrapping="Wrap" Text="Add Mod" VerticalAlignment="Top" Height="19" Width="96" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="AddID_Rectangle" MouseUp="More_AddID_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="203,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="96"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="203,53,0,0" TextWrapping="Wrap" Text="Add ID" VerticalAlignment="Top" Height="19" Width="96" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Rectangle x:Name="MyInfo_Rectangle" MouseUp="More_MyInfo_MouseUp" Cursor="Hand" HorizontalAlignment="Left" Height="23" Margin="304,50,0,0" Stroke="#FF2F2F2F" Fill="#FF2F2F2F" VerticalAlignment="Top" Width="96"/>
+                <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="304,53,0,0" TextWrapping="Wrap" Text="My Info" VerticalAlignment="Top" Height="19" Width="96" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Grid x:Name="MoreGeneralTab" Visibility="Collapsed">
+                    <Button Content="Uninject" Style="{StaticResource AlgoButton}" Click="Uninject_Button_Click" Cursor="Hand" HorizontalAlignment="Left" Margin="118,120,0,0" VerticalAlignment="Top" Width="112"/>
+                    <CheckBox x:Name="Log_CheckBox" FontFamily="{StaticResource OxygenFont}" Checked="Log_CheckBox_Checked"  Unchecked="Log_CheckBox_Unchecked" Content="Enable Log" HorizontalAlignment="Left" Margin="10,125,0,0" VerticalAlignment="Top" Width="103" Foreground="#FFCCCCCC"/>
+                    <CheckBox x:Name="Admin_CheckBox" FontFamily="{StaticResource OxygenFont}" Checked="Admin_CheckBox_Checked"  Unchecked="Admin_CheckBox_Unchecked" Content="Administrator" HorizontalAlignment="Left" Margin="10,105,0,0" VerticalAlignment="Top" Width="103" Foreground="#FFCCCCCC"/>
+                    <Button Content="Open Log" Style="{StaticResource AlgoButton}" Click="LogOpen_Button_Click" Cursor="Hand" HorizontalAlignment="Left" Margin="235,120,0,0" VerticalAlignment="Top" Width="75"/>
+                    <Button Content="Uninstall" Style="{StaticResource AlgoButton}" Click="Uninstall_Button_Click" Cursor="Hand" HorizontalAlignment="Left" Margin="315,120,0,0" VerticalAlignment="Top" Width="75"/>
+                    <TextBlock x:Name="InjectedMod_Text" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="10,80,0,0" TextWrapping="Wrap" Text="Injected mod:" VerticalAlignment="Top" Height="19" Width="346" TextAlignment="Left" Foreground="#FFA0A0A0"/>
+                </Grid>
+
+                <Grid x:Name="MoreAddModTab" Visibility="Collapsed">
+                    <TextBlock x:Name="Credits_Text" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,93,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="17" Width="308" TextAlignment="Center" Foreground="#FF17BF00"/>
+                    <ComboBox x:Name="AddMod_ComboBox" Style="{StaticResource AlgoComboBox}" MouseLeftButtonUp="AddMod_ComboBox_MouseLeftButtonUp" HorizontalAlignment="Left" Margin="108,118,0,0" VerticalAlignment="Top" Width="176"/>
+                    <Button Content="Get Mod" Style="{StaticResource AlgoButton}" Click="GetMod_Clicked" Cursor="Hand" HorizontalAlignment="Left" Margin="289,118,0,0" VerticalAlignment="Top" Width="101" Height="22"/>
+                    <TextBlock HorizontalAlignment="Left" FontFamily="{StaticResource OxygenFont}" IsHitTestVisible="False" Margin="1,120,0,0" TextWrapping="Wrap" Text="Choose your mod:" VerticalAlignment="Top" Height="17" Width="108" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+                </Grid>
+                <TextBlock x:Name="NoCredits_Text" FontFamily="{StaticResource OxygenFont}" Visibility="Hidden" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,85,0,0" TextWrapping="Wrap" Text="You do not have any mod credits! &#xa; You gain a mod credit every month you're subscribed to Algo's Patreon." VerticalAlignment="Top" Height="51" Width="308" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <Grid x:Name="MoreAddIDTab" Visibility="Collapsed">
+                    <TextBlock x:Name="AddID_TextBox" FontFamily="{StaticResource OxygenFont}" Foreground="DarkGreen" HorizontalAlignment="Left" Margin="10,120,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="263" Height="20"/>
+                    <Button x:Name="AddID_Button" Style="{StaticResource AlgoButton}" Click="AddID_Button_Click" Cursor="Hand" Content="Add ID" HorizontalAlignment="Left" Margin="278,120,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.564,1.236" Width="112"/>
+                    <ComboBox x:Name="AddID_EpicComboBox" Style="{StaticResource AlgoComboBox}" MouseLeftButtonUp="AddID_EpicComboBox_MouseLeftButtonUp" HorizontalAlignment="Left" Margin="10,119,0,0" VerticalAlignment="Top" Width="248"/>
+                    <TextBlock x:Name="AddID_EpicText" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="10,99,0,0" TextWrapping="Wrap" Text="Choose which Epic ID to add:" VerticalAlignment="Top" Height="19" Width="205" TextAlignment="Left" Foreground="#FFA0A0A0"/>
+                </Grid>
+                <TextBlock x:Name="NoAddID_Text" FontFamily="{StaticResource OxygenFont}" Visibility="Hidden" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="58" Width="388" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+
+                <TextBlock x:Name="MyInfo_InfoText" FontFamily="{StaticResource OxygenFont}" Visibility="Hidden" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,78,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="71" Width="380" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+            </Grid>
+
+            <!-- tab links -->
+            <Image x:Name="PatreonBanner" Source="Images/PatreonBanner.png" MouseLeftButtonUp="Patreon_Click" Visibility="Hidden" Cursor="Hand" HorizontalAlignment="Left" Height="46" Margin="210,52,0,0" VerticalAlignment="Top" Width="187"/>
+            <Image x:Name="DiscordBanner" Source="Images/DiscordBanner.png" MouseLeftButtonUp="Discord_Click" Visibility="Hidden" Cursor="Hand" HorizontalAlignment="Left" Height="46" Margin="210,95,0,0" VerticalAlignment="Top" Width="187" Grid.RowSpan="2"/>
+            <Image x:Name="WebsiteBanner" Source="Images/AlgoRLcomBanner.png" MouseLeftButtonUp="Website_Click" Visibility="Hidden" Cursor="Hand" HorizontalAlignment="Left" Height="52" Margin="10,67,0,0" VerticalAlignment="Top" Width="195" Grid.RowSpan="2"/>
+
+            <!-- tab help -->
+            <WebBrowser x:Name="HelpBrowser" Visibility="Hidden" Margin="0,49,0,0"/>
+        </Grid>
+        <!-- window controls -->
+        <Rectangle MouseLeftButtonDown="Drag" HorizontalAlignment="Center" Height="22" Stroke="#FF171717" VerticalAlignment="Top" Width="400" Fill="#FF171717"/>
+        <Image x:Name="XImage" Source="Images/AlgoModX.png" MouseEnter="X_MouseEnter" MouseLeave="X_MouseLeave" MouseLeftButtonUp="ExitApp" Cursor="Hand" HorizontalAlignment="Left" Height="14" Margin="380,4,0,0" VerticalAlignment="Top" Width="14"/>
+        <Image x:Name="DashImage" Source="Images/AlgoModDash.png" MouseEnter="Dash_MouseEnter" MouseLeave="Dash_MouseLeave" MouseLeftButtonUp="Minimize" Cursor="Hand" HorizontalAlignment="Left" Height="14" Margin="357,4,0,0" VerticalAlignment="Top" Width="14"/>
+        <Label x:Name="Title" Content="AlgoMod v2.0" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="0,-2,0,0" VerticalAlignment="Top" Width="352" Foreground="#FF4C4C4C"/>
+
+        <!-- loading screen -->
+        <Image x:Name="LoadingScreen" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/AlgoLoadGif.gif" Height="128" Margin="0,22,0,0" VerticalAlignment="Top"/>
+
+        <!-- no internet? -->
+        <Image x:Name="NoInternet" Visibility="Hidden" Source="Images/AlgoNoInternet.png" Height="128" Margin="0,22,0,0" VerticalAlignment="Top"/>
+
+        <!-- popup -->
+        <Grid x:Name="PopupGrid" Visibility="Collapsed">
+            <Rectangle x:Name="Popup_Background" HorizontalAlignment="Center" Height="128" VerticalAlignment="Top" Width="400" Fill="#3F000000" Margin="0,22,0,0"/>
+            <Rectangle x:Name="Popup_Panel" HorizontalAlignment="Center" Height="86" Margin="0,0,0,0" Stroke="#FF949494" VerticalAlignment="Center" Width="290" Fill="#FF1F1F1F"/>
+            <Button x:Name="Popup_Button" Style="{StaticResource AlgoButton}" Content="Okay" Click="Popup_Clicked" Cursor="Hand" HorizontalAlignment="Center" Margin="0,93,0,0" VerticalAlignment="Top" Width="136"/>
+            <TextBlock x:Name="Popup_Title" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,34,0,0" TextWrapping="Wrap" Text="Error!" VerticalAlignment="Top" Height="17" Width="162" TextAlignment="Center" Foreground="#FFC1C1C1" FontSize="14"/>
+            <TextBlock x:Name="Popup_Description" FontFamily="{StaticResource OxygenFont}" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="0,53,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="35" Width="264" TextAlignment="Center" Foreground="#FFA0A0A0"/>
+        </Grid>
+    </Grid>
+</Window>
